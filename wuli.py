@@ -74,11 +74,22 @@ class Phy:
             lisize = dx * k
         self.force2(lisize, other.p)
         other.force2(lisize, self.p)
-        Phy.rbiao.append((self, other))
+        if not((self, other) in Phy.rbiao):
+            Phy.rbiao.append((self, other))
 
     rbook = {}  # 用来储存弹簧的长度，向x填入None时用
 
     rbiao = []  # 用来储存需要连成弹簧的点，显示用，显示后要清空！
+
+    @classmethod
+    def rread(cls,biao):
+        '''
+        将弹力列表中的内容转为弹力
+        :param biao: [{"self":Phy, "other":Phy, "x":float, "k":float, "string":bool},...]
+        :return: None
+        '''
+        for i in biao:
+            i["self"].resilience(i["x"],i["k"],i["other"],i["string"])
 
     def bounce(self, k, other="*"):
         '''
@@ -173,6 +184,49 @@ class Phy:
         turtle.penup()
         turtle.hideturtle()
 
+    @classmethod
+    def saveone(cls):
+        m=[]
+        v=[]
+        p=[]
+        r=[]
+        color=[]
+        axianshi=[]
+        rbiao=[]
+        for i in Phy.biao:
+            m.append(i.m)
+            v.append(tuple(i.v))
+            p.append(tuple(i.p))
+            r.append(i.r)
+            color.append(i.color)
+            axianshi.append(i.axianshi)
+        for j in Phy.rbiao:
+            rbiao.append((Phy.biao.index(j[0]),Phy.biao.index(j[1])))
+        m=tuple(m)
+        v = tuple(v)
+        p = tuple(p)
+        r = tuple(r)
+        color = tuple(color)
+        axianshi = tuple(axianshi)
+        rbiao=tuple(rbiao)
+
+        z=(m,v,p,r,color,axianshi,rbiao)
+        return z
+
+    @classmethod
+    def readone(cls,z):
+        Phy.biao = []
+        Phy.rbiao = []
+
+        for j in range(len(z[0])):
+            a=Phy(z[0][j],z[1][j],z[2][j],z[3][j],z[4][j])
+
+        for i2 in range(len(Phy.biao)):
+            Phy.biao[i2].axianshi=z[5][i2]
+
+        for k in z[6]:
+            Phy.rbiao.append((Phy.biao[k[0]],Phy.biao[k[1]]))
+
     zhenshu = 0  # 显示过的帧数
 
     @classmethod
@@ -186,6 +240,24 @@ class Phy:
         return [d[0]*x[0][0]+d[1]*x[1][0]+d[2]*x[2][0],
                 d[0]*x[0][1]+d[1]*x[1][1]+d[2]*x[2][1],
                 d[0]*x[0][2]+d[1]*x[1][2]+d[2]*x[2][2]]
+
+    @classmethod
+    def shijiaoshi(cls,d,fm,to):    #测试中
+        '''
+        视角矢量
+        :param d: list[x,y,z] 需要变换的点的坐标
+        :param fm: list[x,y,z] 出发点坐标
+        :param to: list[x,y,z] 看向点坐标
+        :return: list[x,y,z] 变换后点坐标
+        '''
+        d1=[d[0]-fm[0],d[1]-fm[1],d[2]-fm[2]]
+        dis=(to[0]**2+to[1]**2+to[2]**2)**0.5
+        dis2=(to[0]**2+to[1]**2)**0.5
+
+        m=[[to[1]/dis2,to[0]/dis2,0],
+           [to[2]*to[0]/dis2,to[2]*to[1]/dis2,dis2],
+           [to[0]/dis,to[1]/dis,to[2]/dis]]
+        return Phy.xianxing(d1,m)
 
     @classmethod
     def tplay(cls, fps=1, a=False, v=False, c=None, x=None):
@@ -256,8 +328,9 @@ class Phy:
         '''
         def __init__(self):
             self.biao=[]
+            self.zhenshu=0
 
-        def draw(self,inx,iny,dis,chang=200,kx=1,ky=1,color="black",phyon=True,bi=False):
+        def draw(self,inx,iny,dis,chang=200,kx=1,ky=1,tiao=1,color="black",phyon=True,bi=False):
             '''
             使用turtle实现的图表显示
             :param inx: float 点的x坐标
@@ -266,6 +339,7 @@ class Phy:
             :param chang: float 图表长度
             :param kx: float x放大系数
             :param ky: float y放大系数
+            :param tiao: float 每隔多少次采样
             :param color: list(r,g,b) 颜色
             :param phyon: bool 是否使用Phy.tplay
             :param bi: bool 是否在点之间画线
@@ -274,11 +348,13 @@ class Phy:
             import turtle
             if phyon is False:
                 Phy.tready()
-            if inx is None:
-                self.biao.append([len(self.biao), iny])
-            else:
-                self.biao.append([inx, iny])
-            if self.biao[-1][0] > chang:
+
+            if self.zhenshu%tiao==0:
+                if inx is None:
+                    self.biao.append([len(self.biao), iny])
+                else:
+                    self.biao.append([inx, iny])
+            if len(self.biao) > chang:
                 self.biao.pop(0)
 
             if inx is None:
@@ -305,6 +381,8 @@ class Phy:
             if phyon is False:
                 turtle.update()
                 turtle.clear()
+            self.zhenshu+=1
+
 
 class DingPhy(Phy): #定点，不参与力的计算
     def __init__(self, m, v, p, r=None, color="black"):
@@ -500,4 +578,5 @@ class object:
         for i in self.biao:
             turtle.goto(Changjing.view(i.p, Changjing.camara, Changjing.k))
         turtle.end_fill()
+
 

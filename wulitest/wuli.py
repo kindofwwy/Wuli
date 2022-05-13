@@ -354,7 +354,7 @@ class Phy:
                     self.biao.append([len(self.biao), iny])
                 else:
                     self.biao.append([inx, iny])
-            if self.biao[-1][0] > chang:
+            if len(self.biao) > chang:
                 self.biao.pop(0)
 
             if inx is None:
