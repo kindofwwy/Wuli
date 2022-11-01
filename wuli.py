@@ -3,7 +3,7 @@ class Phy:
     逻辑：创建点→以下循环→计算力→计算加速度→计算速度→计算位置
     '''
 
-    def __init__(self, m, v, p, r=None, color="black"):
+    def __init__(self, m, v, p, r=None, color="black", e=0):
         '''
         创建一个点
         :param m: float 质量大小，取正数
@@ -11,6 +11,7 @@ class Phy:
         :param p: list[x,y,z] x,y,z为float 位置
         :param color: str or tuple(r,g,b) 点的颜色
         :param r: float 点的半径
+        :param e: float 电荷
         a: list[x,y,z] 加速度，矢量
         '''
         self.m = m
@@ -22,6 +23,7 @@ class Phy:
         self.r = r
         self.axianshi = self.a
         self.color = color
+        self.e=e
         Phy.biao.append(self)
 
     biao = []  # 这个表里记录了所有被创建的点，计算时会遍历它
@@ -124,6 +126,36 @@ class Phy:
                 r = ((oout.p[0] - oin.p[0]) ** 2 + (oout.p[1] - oin.p[1]) ** 2 + (oout.p[2] - oin.p[2]) ** 2) ** 0.5
                 G = g * oout.m * oin.m / (r ** 2)
                 oout.force2(G, oin.p)
+
+    @classmethod
+    def coulomb(cls,k):
+        '''
+        对全部点施以静电力
+        :param k: 静电力常量
+        :return: None 直接修改a，无返回
+        '''
+        for oout in Phy.biao:
+            for oin in Phy.biao:
+                if oout == oin:
+                    continue
+                r = ((oout.p[0] - oin.p[0]) ** 2 + (oout.p[1] - oin.p[1]) ** 2 + (oout.p[2] - oin.p[2]) ** 2) ** 0.5
+                f = -k * oout.e * oin.e / (r ** 2)
+                oout.force2(f, oin.p)
+
+    def electrostatic(self,k):
+        '''
+        对某点施以静电力
+        :param k: 静电力常量
+        :return: None 直接修改a，无返回
+        '''
+        for i in Phy.biao:
+            if i==self:
+                continue
+            r = ((self.p[0]-i.p[0])**2+(self.p[1]-i.p[1])**2+(self.p[2]-i.p[2])**2)**0.5
+            if r==0:
+                r=10e-9
+            f = -k*self.e*i.e/r**2
+            self.force2(f,i.p)
 
     @classmethod
     def momentum(cls):
@@ -330,10 +362,17 @@ class Phy:
             self.biao=[]
             self.zhenshu=0
 
+        def clean(self):
+            '''
+            清空图表
+            :return: None
+            '''
+            self.__init__()
+
         def draw(self,inx,iny,dis,chang=200,kx=1,ky=1,tiao=1,color="black",phyon=True,bi=False):
             '''
             使用turtle实现的图表显示
-            :param inx: float 点的x坐标
+            :param inx: float 点的x坐标，若希望图表不会移动，此处为None
             :param iny: float 点的y坐标
             :param dis: list[x,y] 坐标原点位置
             :param chang: float 图表长度
