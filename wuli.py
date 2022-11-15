@@ -218,6 +218,10 @@ class Phy:
 
     @classmethod
     def saveone(cls):
+        '''
+        保存当前的状态（包括所有的点，其质量、位置、速度和加速度、半径、颜色，以及rbiao）为一个元组
+        :return: tuple((m0,m1...),(v0,v1...),(p0,p1...),(r0,r1...),(color0,color1...),(a0,a1...),rbiao)
+        '''
         m=[]
         v=[]
         p=[]
@@ -227,8 +231,8 @@ class Phy:
         rbiao=[]
         for i in Phy.biao:
             m.append(i.m)
-            v.append(tuple(i.v))
-            p.append(tuple(i.p))
+            v.append(i.v)
+            p.append(i.p)
             r.append(i.r)
             color.append(i.color)
             axianshi.append(i.axianshi)
@@ -247,11 +251,16 @@ class Phy:
 
     @classmethod
     def readone(cls,z):
+        '''
+        读取saveone中返回的元组，将当前环境设置为元组中的状态
+        :param z: tuple((m0,m1...),(v0,v1...),(p0,p1...),(r0,r1...),(color0,color1...),(a0,a1...),rbiao)
+        :return: None 修改Phy中的biao和rbiao，无返回
+        '''
         Phy.biao = []
         Phy.rbiao = []
 
         for j in range(len(z[0])):
-            a=Phy(z[0][j],z[1][j],z[2][j],z[3][j],z[4][j])
+            Phy(z[0][j],z[1][j],z[2][j],z[3][j],z[4][j])
 
         for i2 in range(len(Phy.biao)):
             Phy.biao[i2].axianshi=z[5][i2]
@@ -292,7 +301,7 @@ class Phy:
         return Phy.xianxing(d1,m)
 
     @classmethod
-    def tplay(cls, fps=1, a=False, v=False, c=None, x=None):
+    def tplay(cls, fps=1, a=False, v=False, c=None, x=None, azoom=1, vzoom=1):
         '''
         使用turtle的显示模块（只显示1帧，需和run一起循环调用）
         :param fps: int 跳过的帧数
@@ -300,6 +309,8 @@ class Phy:
         :param v: bool 是否显示速度标
         :param c: Phy 参考系
         :param x: list[[x,y,z],[x,y,z],[x,y,z]] 线性变换矩阵
+        :param azoom: float 加速度标缩放系数
+        :param vzoom: float 速度标缩放系数
         :return: None
         '''
         if c is None:
@@ -329,9 +340,9 @@ class Phy:
                 turtle.goto(d[0], d[1])
                 turtle.dot(i.r * 2, i.color)
                 if a == True:
-                    da=Phy.xianxing([i.p[0]-c.p[0] + i.axianshi[0]* 1-c.axianshi[0],
-                                     i.p[1]-c.p[1] + i.axianshi[1]* 1-c.axianshi[1],
-                                     i.p[2]-c.p[2] + i.axianshi[2]* 1-c.axianshi[2]],x)
+                    da=Phy.xianxing([i.p[0]-c.p[0] + (i.axianshi[0]* 1-c.axianshi[0])*azoom,
+                                     i.p[1]-c.p[1] + (i.axianshi[1]* 1-c.axianshi[1])*azoom,
+                                     i.p[2]-c.p[2] + (i.axianshi[2]* 1-c.axianshi[2])*azoom],x)
                     turtle.pencolor("red")
                     turtle.goto(d[0], d[1])
                     turtle.pendown()
@@ -339,9 +350,9 @@ class Phy:
                     turtle.penup()
                     turtle.pencolor("black")
                 if v == True:
-                    dv=Phy.xianxing([i.p[0]-c.p[0] + i.v[0]* 1-c.v[0],
-                            i.p[1]-c.p[1] + i.v[1]* 1-c.v[1],
-                            i.p[2]-c.p[2] + i.v[2]* 1-c.v[2]],x)
+                    dv=Phy.xianxing([i.p[0]-c.p[0] + (i.v[0]* 1-c.v[0])* vzoom,
+                            i.p[1]-c.p[1] + (i.v[1]* 1-c.v[1])* vzoom,
+                            i.p[2]-c.p[2] + (i.v[2]* 1-c.v[2])* vzoom],x)
                     turtle.pencolor("blue")
                     turtle.goto(d[0], d[1])
                     turtle.pendown()
