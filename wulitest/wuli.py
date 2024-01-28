@@ -1,3 +1,4 @@
+import turtle
 class Phy:
     '''
     逻辑：创建点→以下循环→计算力→计算加速度→计算速度→计算位置
@@ -196,9 +197,9 @@ class Phy:
         '''
         for dian in Phy.biao:
 
-            dian.p[0] = dian.p[0] + dian.v[0] * t + 0.5*dian.a[0] * t ** 2
-            dian.p[1] = dian.p[1] + dian.v[1] * t + 0.5*dian.a[1] * t ** 2
-            dian.p[2] = dian.p[2] + dian.v[2] * t + 0.5*dian.a[2] * t ** 2
+            dian.p[0] = dian.p[0] + dian.v[0] * t + 0.5 * dian.a[0] * t ** 2
+            dian.p[1] = dian.p[1] + dian.v[1] * t + 0.5 * dian.a[1] * t ** 2
+            dian.p[2] = dian.p[2] + dian.v[2] * t + 0.5 * dian.a[2] * t ** 2
             dian.v[0] = dian.v[0] + dian.a[0] * t
             dian.v[1] = dian.v[1] + dian.a[1] * t
             dian.v[2] = dian.v[2] + dian.a[2] * t
@@ -283,6 +284,16 @@ class Phy:
                 d[0]*x[0][2]+d[1]*x[1][2]+d[2]*x[2][2]]
 
     @classmethod
+    def reference(cls,d1,dr):
+        '''
+        参考系变化
+        :param d1: list[x,y,z] 被变化坐标
+        :param dr: list[x,y,z] 参考系点
+        :return: list[x,y,z] 变化后坐标
+        '''
+        return [d1[0]-dr[0],d1[1]-dr[1],d1[2]-dr[2]]
+
+    @classmethod
     def shijiaoshi(cls,d,fm,to):    #测试中
         '''
         视角矢量
@@ -318,25 +329,19 @@ class Phy:
         if x is None:
             x=[[1,0,0],[0,1,0],[0,0,1]]
         if Phy.zhenshu % fps == 0:
-            import turtle
-            for i in Phy.rbiao:
+            #import turtle
+            for i in Phy.rbiao:     #弹簧绘制
                 turtle.color("black")
-                dr0=Phy.xianxing([i[0].p[0]-c.p[0],
-                                  i[0].p[1]-c.p[1],
-                                  i[0].p[2]-c.p[2]],x)
-                dr1 = Phy.xianxing([i[1].p[0] - c.p[0],
-                                    i[1].p[1] - c.p[1],
-                                    i[1].p[2] - c.p[2]], x)
+                dr0=Phy.xianxing(Phy.reference(i[0].p,c.p),x)
+                dr1 = Phy.xianxing(Phy.reference(i[1].p,c.p), x)
                 turtle.goto(dr0[0], dr0[1])
                 turtle.pendown()
                 turtle.goto(dr1[0], dr1[1])
                 turtle.penup()
             Phy.rbiao = []
 
-            for i in Phy.biao:
-                d=Phy.xianxing([i.p[0]-c.p[0],
-                                i.p[1]-c.p[1],
-                                i.p[2]-c.p[2]],x)
+            for i in Phy.biao:      #点绘制
+                d=Phy.xianxing(Phy.reference(i.p,c.p),x)
                 turtle.goto(d[0], d[1])
                 turtle.dot(i.r * 2, i.color)
                 if a == True:
@@ -404,7 +409,7 @@ class Phy:
                     self.biao.append([len(self.biao), iny])
                 else:
                     self.biao.append([inx, iny])
-            if len(self.biao) > chang:
+            while len(self.biao) > chang:
                 self.biao.pop(0)
 
             if inx is None:
