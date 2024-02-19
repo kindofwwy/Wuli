@@ -98,20 +98,18 @@ class Phy:
         '''
         对指定点施以弹力（撞击时）
         :param k: float 劲度系数
-        :param other: "*" 或 Phy 施力的另一个物体，当为"*"时指对所有点
+        :param other: "*" 或 list[Phy,Phy...] 被碰撞的另一组物体，当为"*"时指对所有点
         :return: None 直接修改a，无返回
         '''
         if other == "*":
-            for i in Phy.biao:
-                if i == self:
-                    continue
-                elif (((i.p[0] - self.p[0]) ** 2 + (i.p[1] - self.p[1]) ** 2 + (
-                        i.p[2] - self.p[2]) ** 2) ** 0.5) - self.r - i.r <= 0:
-                    self.resilience(self.r + i.r, k / 2, i)
-        else:
-            if (((other.p[0] - self.p[0]) ** 2 + (other.p[1] - self.p[1]) ** 2 + (
-                    other.p[2] - self.p[2]) ** 2) ** 0.5) - self.r - other.r <= 0:
-                self.resilience(self.r + other.r, k, other)
+            other=Phy.biao
+        for i in other:
+            if i == self:
+                continue
+            elif (((i.p[0] - self.p[0]) ** 2 + (i.p[1] - self.p[1]) ** 2 + (
+                    i.p[2] - self.p[2]) ** 2) ** 0.5) - self.r - i.r <= 0:
+                self.resilience(self.r + i.r, k / 2, i)
+
 
     @classmethod
     def gravity(cls, g):
@@ -294,22 +292,32 @@ class Phy:
         return [d1[0]-dr[0],d1[1]-dr[1],d1[2]-dr[2]]
 
     @classmethod
-    def shijiaoshi(cls,d,fm,to):    #测试中
+    def shijiaoshi(cls,fm,to):
         '''
         视角矢量
-        :param d: list[x,y,z] 需要变换的点的坐标
         :param fm: list[x,y,z] 出发点坐标
         :param to: list[x,y,z] 看向点坐标
-        :return: list[x,y,z] 变换后点坐标
+        :return: list[[x,y,z],[x,y,z],[x,y,z]] 变换矩阵
         '''
-        d1=[d[0]-fm[0],d[1]-fm[1],d[2]-fm[2]]
-        dis=(to[0]**2+to[1]**2+to[2]**2)**0.5
-        dis2=(to[0]**2+to[1]**2)**0.5
+        zl=((to[0]-fm[0])**2+(to[1]-fm[1])**2+(to[2]-fm[2])**2)**0.5
+        zx=(to[0]-fm[0])/zl
+        zy=(to[1]-fm[1])/zl
+        zz=(to[2]-fm[2])/zl
+        rz=(zx**2+zz**2)**0.5
 
-        m=[[to[1]/dis2,to[0]/dis2,0],
-           [to[2]*to[0]/dis2,to[2]*to[1]/dis2,dis2],
-           [to[0]/dis,to[1]/dis,to[2]/dis]]
-        return Phy.xianxing(d1,m)
+        xx=zz/rz
+        xy=0
+        xz=-zx/rz
+
+        yz=-(xx*zy-zx*xy)
+        yx=-(xy*zz-zy*xz)
+        yy=(xx*zz-zx*xz)
+
+        m=[[xx,xy,xz],
+           [yx,yy,yz],
+           [zx,zy,zz]]
+
+        return m
 
     @classmethod
     def tplay(cls, fps=1, a=False, v=False, c=None, x=None, azoom=1, vzoom=1):
