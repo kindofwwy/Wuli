@@ -292,6 +292,20 @@ class Phy:
         return [d1[0]-dr[0],d1[1]-dr[1],d1[2]-dr[2]]
 
     @classmethod
+    def perspective(cls,d,cam,k):
+        '''
+        透视变换
+        :param d: list[x,y,z] 被变换的点
+        :param cam: list[x,y,z] 相机坐标，相机朝向z轴正半轴方向
+        :param k: float 放大倍率
+        :return: list[x,y] 变换后位置
+        '''
+        d2=Phy.reference(d,cam)
+        d2[2]=0.00001 if d2[2]==0 else d[2]
+        d2=[d2[0]*k/d2[2],d2[1]*k/d2[2]]
+        return d2
+
+    @classmethod
     def shijiaoshi(cls,fm,to):
         '''
         视角矢量
@@ -320,7 +334,23 @@ class Phy:
         return m
 
     @classmethod
-    def tplay(cls, fps=1, a=False, v=False, c=None, x=None, azoom=1, vzoom=1):
+    def dotpos(cls,pos,c=None,x=None):
+        '''
+        计算并返回坐标点经过一系列变换后的位置
+        :param pos: list[x,y,z] 坐标点位置
+        :param c: list[x,y,z] 参考系
+        :param x: list[[x,y,z],[x,y,z],[x,y,z]] 线性变换矩阵
+        :return: list[x,y,z] 坐标点变换后位置
+        '''
+        if c is None:
+            c=[0,0,0]
+        if x is None:
+            x=[[1,0,0],[0,1,0],[0,0,1]]
+        return Phy.xianxing(Phy.reference(pos,c),x)
+
+
+    @classmethod
+    def tplay(cls, fps=1, a=False, v=False, c=None, x=None, azoom=1, vzoom=1, k=None):
         '''
         使用turtle的显示模块（只显示1帧，需和run一起循环调用）
         :param fps: int 跳过的帧数
@@ -330,8 +360,10 @@ class Phy:
         :param x: list[[x,y,z],[x,y,z],[x,y,z]] 线性变换矩阵
         :param azoom: float 加速度标缩放系数
         :param vzoom: float 速度标缩放系数
+        :param k: float 透视变换放大系数，为None时不进行透视变换
         :return: None
         '''
+        toushi=lambda x:Phy.perspective(x,[0,0,0],k) if k is not None else x
         if c is None:
             c=DingPhy(0,[0,0,0],[0,0,0],0)
         if x is None:
@@ -340,8 +372,12 @@ class Phy:
             #import turtle
             for i in Phy.rbiao:     #弹簧绘制
                 turtle.color("black")
-                dr0=Phy.xianxing(Phy.reference(i[0].p,c.p),x)
-                dr1 = Phy.xianxing(Phy.reference(i[1].p,c.p), x)
+                dr0=Phy.dotpos(i[0].p,c.p,x)
+                dr1=Phy.dotpos(i[1].p,c.p,x)
+                if k is not None and (dr0[2]<=0 or dr1[2]<=0) :
+                    continue
+                dr0=toushi(dr0)
+                dr1=toushi(dr1)
                 turtle.goto(dr0[0], dr0[1])
                 turtle.pendown()
                 turtle.goto(dr1[0], dr1[1])
@@ -349,13 +385,19 @@ class Phy:
             Phy.rbiao = []
 
             for i in Phy.biao:      #点绘制
-                d=Phy.xianxing(Phy.reference(i.p,c.p),x)
+                d=Phy.dotpos(i.p,c.p,x)
+                if k is not None and d[2]<=0:
+                    continue
+                d=toushi(d)
                 turtle.goto(d[0], d[1])
                 turtle.dot(i.r * 2, i.color)
                 if a == True:
                     da=Phy.xianxing([i.p[0]-c.p[0] + (i.axianshi[0]* 1-c.axianshi[0])*azoom,
                                      i.p[1]-c.p[1] + (i.axianshi[1]* 1-c.axianshi[1])*azoom,
                                      i.p[2]-c.p[2] + (i.axianshi[2]* 1-c.axianshi[2])*azoom],x)
+                    if k is not None and da[2]<=0:
+                        continue
+                    da=toushi(da)
                     turtle.pencolor("red")
                     turtle.goto(d[0], d[1])
                     turtle.pendown()
@@ -366,6 +408,9 @@ class Phy:
                     dv=Phy.xianxing([i.p[0]-c.p[0] + (i.v[0]* 1-c.v[0])* vzoom,
                             i.p[1]-c.p[1] + (i.v[1]* 1-c.v[1])* vzoom,
                             i.p[2]-c.p[2] + (i.v[2]* 1-c.v[2])* vzoom],x)
+                    if k is not None and dv[2]<=0:
+                        continue
+                    dv=toushi(dv)
                     turtle.pencolor("blue")
                     turtle.goto(d[0], d[1])
                     turtle.pendown()
