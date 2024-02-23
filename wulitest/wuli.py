@@ -306,31 +306,77 @@ class Phy:
         return d2
 
     @classmethod
-    def shijiaoshi(cls,fm,to):
+    def shijiaox(cls,fm,to):
         '''
-        视角矢量
+        视角矢量x，在x-z平面上旋转坐标轴，旋转至出发点正对着看向点（x方向上）
         :param fm: list[x,y,z] 出发点坐标
         :param to: list[x,y,z] 看向点坐标
         :return: list[[x,y,z],[x,y,z],[x,y,z]] 变换矩阵
         '''
-        zl=((to[0]-fm[0])**2+(to[1]-fm[1])**2+(to[2]-fm[2])**2)**0.5
-        zx=(to[0]-fm[0])/zl
-        zy=(to[1]-fm[1])/zl
-        zz=(to[2]-fm[2])/zl
-        rz=(zx**2+zz**2)**0.5
+        zl = ((to[0] - fm[0]) ** 2 + (to[2] - fm[2]) ** 2) ** 0.5
+        zx = -(to[0] - fm[0]) / zl
+        zz = (to[2] - fm[2]) / zl
+        rz = (zx ** 2 + zz ** 2) ** 0.5
 
-        xx=zz/rz
-        xy=0
-        xz=-zx/rz
-
-        yz=-(xx*zy-zx*xy)
-        yx=-(xy*zz-zy*xz)
-        yy=(xx*zz-zx*xz)
-
+        xx = zz / rz
+        xy = 0
+        xz = -zx / rz
         m=[[xx,xy,xz],
-           [yx,yy,yz],
-           [zx,zy,zz]]
+           [0,1,0],
+           [zx,0,zz]]
+        return m
 
+    @classmethod
+    def shijiaoy(cls,fm,to):
+        '''
+        视角矢量y，在y-z平面上旋转坐标轴，旋转至出发点正对着看向点（y方向上）
+        :param fm: list[x,y,z] 出发点坐标
+        :param to: list[x,y,z] 看向点坐标
+        :return: list[[x,y,z],[x,y,z],[x,y,z]] 变换矩阵
+        '''
+        zl = ((to[1] - fm[1]) ** 2 + (to[2] - fm[2]) ** 2) ** 0.5
+        zy = -(to[1] - fm[1]) / zl
+        zz = (to[2] - fm[2]) / zl
+        rz = (zy ** 2 + zz ** 2) ** 0.5
+
+        yx = 0
+        yy = zz / rz
+        yz = -zy / rz
+        m = [[1, 0, 0],
+             [yx, yy, yz],
+             [0, zy, zz]]
+        return m
+
+
+    @classmethod
+    def shijiaoshi(cls,fm,to):
+        '''
+        视角矢量，旋转坐标轴，旋转至出发点正对着看向点
+        :param fm: list[x,y,z] 出发点坐标
+        :param to: list[x,y,z] 看向点坐标
+        :return: list[[x,y,z],[x,y,z],[x,y,z]] 变换矩阵
+        '''
+        # zl=((to[0]-fm[0])**2+(to[1]-fm[1])**2+(to[2]-fm[2])**2)**0.5
+        # zx=-(to[0]-fm[0])/zl
+        # zy=-(to[1]-fm[1])/zl
+        # zz=(to[2]-fm[2])/zl
+        # rz=(zx**2+zz**2)**0.5
+        # xx=zz/rz
+        # xy=0
+        # xz=-zx/rz
+        # yz=-(xx*zy-zx*xy)
+        # yx=-(xy*zz-zy*xz)
+        # yy=(xx*zz-zx*xz)
+        # m=[[xx,xy,xz],
+        #    [yx,yy,yz],
+        #    [zx,zy,zz]]
+        mx=Phy.shijiaox(fm,to)
+        fm=Phy.xianxing(fm,mx)
+        to=Phy.xianxing(to,mx)
+        my=Phy.shijiaoy(fm,to)
+        m=[Phy.xianxing(mx[0],my),
+           Phy.xianxing(mx[1],my),
+           Phy.xianxing(mx[2],my)]
         return m
 
     @classmethod

@@ -15,42 +15,55 @@ def zuobiaoxian(x):
         turtle.pu()
 
 
-
-
 def r(x,y):
     biao[random.randint(0,7)].force2(10000000,[x,y,0])
 
-def xp():
-    d0p.p[0]+=1
-def xn():
-    d0p.p[0]-=1
-def yp():
-    d0p.p[1]+=1
-def yn():
-    d0p.p[1]-=1
+def fw():
+    dl=(d[0]**2+d[2]**2)**0.5
+    d0.p[0] += d[0] / dl *buchang
+    d0.p[2] += d[2] / dl *buchang
+def bw():
+    dl = (d[0]**2+d[2]**2)**0.5
+    d0.p[0] -= d[0] / dl *buchang
+    d0.p[2] -= d[2] / dl *buchang
+def le():
+    dl = (d[0]**2+d[2]**2)**0.5
+    d0.p[0] -= d[2] / dl *buchang
+    d0.p[2] -= -d[0] / dl *buchang
+def ri():
+    dl = (d[0]**2+d[2]**2)**0.5
+    d0.p[0] += d[2] / dl *buchang
+    d0.p[2] += -d[0] / dl *buchang
 def zp():
-    d0p.p[2]+=1
+    d0.p[1]+=buchang
 def zn():
-    d0p.p[2]-=1
+    d0.p[1]-=buchang
 
-def xp2():
-    d[0]+=1
-def xn2():
-    d[0]-=1
-def yp2():
-    d[1]+=1
-def yn2():
-    d[1]-=1
+def cu():
+    d[1]+=cbuchang
+def cd():
+    d[1]-=cbuchang
+def cl():
+    dl = (d[0] ** 2 + d[2] ** 2) ** 0.5
+    d[0] -= d[2] / dl*cbuchang
+    d[2] -= -d[0] / dl*cbuchang
+def cr():
+    dl = (d[0] ** 2 + d[2] ** 2) ** 0.5
+    d[0] += d[2] / dl*cbuchang
+    d[2] += -d[0] / dl*cbuchang
 def zp2():
-    d[2]+=1
+    d[2]+=cbuchang
 def zn2():
-    d[2]-=1
+    d[2]-=cbuchang
 
 
-d=[0,0,100]
-d0p=Phy(1,[0,0,0],[0,0,-300])
+d=[0,0,10]
+d0=Phy(1, [0, 0, 0], [0, 0, -300])
+cbuchang=0.5
+buchang=5
 
-    
+dp=Phy(1,[0,0,0],[d[0] + d0.p[0], d[1] + d0.p[1], d[2] + d0.p[2]],r=5,color="red")
+
 Phy.tready()
 a=[50,50,50]
 biao=[]
@@ -75,7 +88,6 @@ while True:
     biao[3].resilience(None,k,biao[0])
     biao[7].resilience(None,k,biao[4])
     biao[3].resilience(None,k,biao[7])
-
     biao[0].resilience(None,k,biao[5])
     biao[0].resilience(None,k,biao[7])
     biao[0].resilience(None,k,biao[2])
@@ -92,25 +104,26 @@ while True:
     for i in biao:
         i.force([-i.v[0]*5,-i.v[1]*5,-i.v[2]*5])
 
-    x=Phy.shijiaoshi(d0p.p,[d[0]+d0p.p[0],d[1]+d0p.p[1],d[2]+d0p.p[2]])
+    x=Phy.shijiaoshi(d0.p, [d[0] + d0.p[0], d[1] + d0.p[1], d[2] + d0.p[2]])
+    dp.p=[d[0] + d0.p[0], d[1] + d0.p[1], d[2] + d0.p[2]]
 
     Phy.run(0.001)
-    Phy.tplay(x=x,c=d0p,k=300)
+
+    Phy.tplay(x=x, c=d0, k=500)
     turtle.onscreenclick(r)
-    turtle.onkeypress(xp, key="d")
-    turtle.onkeypress(xn, key="a")
-    turtle.onkeypress(yp, key="w")
-    turtle.onkeypress(yn, key="s")
+    turtle.onkeypress(fw, key="w")
+    turtle.onkeypress(bw, key="s")
+    turtle.onkeypress(le, key="a")
+    turtle.onkeypress(ri, key="d")
     turtle.onkeypress(zp, key="q")
     turtle.onkeypress(zn, key="e")
 
-    turtle.onkeypress(xp2, key="l")
-    turtle.onkeypress(xn2, key="j")
-    turtle.onkeypress(yp2, key="i")
-    turtle.onkeypress(yn2, key="k")
+    turtle.onkeypress(cu, key="i")
+    turtle.onkeypress(cd, key="k")
+    turtle.onkeypress(cl, key="j")
+    turtle.onkeypress(cr, key="l")
     turtle.onkeypress(zp2, key="u")
     turtle.onkeypress(zn2, key="o")
     turtle.listen()
-    print(d0p.p,d)
-    #zuobiaoxian(x)
+    zuobiaoxian(x)
 
