@@ -468,6 +468,140 @@ class Phy:
             turtle.clear()
         Phy.zhenshu += 1
 
+    class camera:
+        def __init__(self,campos=None,lookpos=None,fix=True,k=300):
+            '''
+            创建一个相机
+            :param campos: list[x,y,z] 相机位置
+            :param lookpos: list[x,y,z] 注视点坐标
+            :param fix: bool 相机是否固定（不受到Phy的影响）
+            :param k: float 画面放大系数
+            '''
+            if campos is None:
+                campos=[0,0,-300]
+            if lookpos is None:
+                lookpos=[0,0,0]
+            if fix:
+                self.cam=DingPhy(1,[0,0,0],campos)
+            else:
+                self.cam=Phy(1,[0,0,0], campos)
+            l=((lookpos[0]-campos[0])**2+(lookpos[1]-campos[1])**2+(lookpos[2]-campos[2])**2)**0.5
+            self.relalookpos=[(lookpos[0]-campos[0])/l, # 相对注视点坐标
+                              (lookpos[1]-campos[1])/l,
+                              (lookpos[2]-campos[2])/l]
+            self.k=k
+
+        @classmethod
+        def tready(self):
+            '''
+            请使用前调用
+            :return: None
+            '''
+            Phy.tready()
+
+        def tplay(self,a=False,v=False,azoom=1,vzoom=1,zuobiaoxian=False):
+            '''
+            使用turtle的相机显示模块（只显示1帧，需循环调用）
+            :param a: bool 是否显示加速度标
+            :param v: bool 是否显示速度标
+            :param azoom: float 加速度标放大系数
+            :param vzoom: float 速度标放大系数
+            :param zuobiaoxian: bool 是否显示迷你坐标线
+            :return: None
+            '''
+            x = Phy.shijiaoshi(self.cam.p, [self.relalookpos[0] + self.cam.p[0],
+                                            self.relalookpos[1] + self.cam.p[1],
+                                            self.relalookpos[2] + self.cam.p[2]])
+            if zuobiaoxian:
+                xian = [Phy.xianxing([100, 0, 0], x),
+                        Phy.xianxing([0, 100, 0], x),
+                        Phy.xianxing([0, 0, 100], x)]
+                turtle.goto(xian[2][0], xian[2][1])
+                turtle.dot(3, "red")
+                for i in range(len(xian)):
+                    turtle.pencolor("black")
+                    turtle.goto(0, 0)
+                    turtle.pd()
+                    turtle.goto(xian[i][0], xian[i][1])
+                    turtle.pu()
+            Phy.tplay(a=a,v=v,azoom=azoom,vzoom=vzoom,c=self.cam,x=x,k=self.k)
+
+        def movecam(self, stepsize=1, camstepsize=0.02):
+            '''
+            通过turtle键盘控制移动相机与转换视角
+            前进：w
+            后退：s
+            左移：a
+            右移：d
+            上移：空格
+            下移：左Control
+            左转：左箭头
+            右转：右箭头
+            上仰：上箭头
+            下俯：下箭头
+            放大：]
+            缩小：[
+            :param stepsize: float 相机移动步长
+            :param camstepsize: float 相机视角转动步长
+            :return: None
+            '''
+            def fw():
+                dl = (self.relalookpos[0] ** 2 + self.relalookpos[2] ** 2) ** 0.5
+                self.cam.p[0] += self.relalookpos[0] / dl * stepsize
+                self.cam.p[2] += self.relalookpos[2] / dl * stepsize
+            def bw():
+                dl = (self.relalookpos[0] ** 2 + self.relalookpos[2] ** 2) ** 0.5
+                self.cam.p[0] -= self.relalookpos[0] / dl * stepsize
+                self.cam.p[2] -= self.relalookpos[2] / dl * stepsize
+            def le():
+                dl = (self.relalookpos[0] ** 2 + self.relalookpos[2] ** 2) ** 0.5
+                self.cam.p[0] -= self.relalookpos[2] / dl * stepsize
+                self.cam.p[2] -= -self.relalookpos[0] / dl * stepsize
+            def ri():
+                dl = (self.relalookpos[0] ** 2 + self.relalookpos[2] ** 2) ** 0.5
+                self.cam.p[0] += self.relalookpos[2] / dl * stepsize
+                self.cam.p[2] += -self.relalookpos[0] / dl * stepsize
+            def zp():
+                self.cam.p[1] += stepsize
+            def zn():
+                self.cam.p[1] -= stepsize
+            def cu():
+                self.relalookpos[1] += camstepsize
+            def cd():
+                self.relalookpos[1] -= camstepsize
+            def cl():
+                dl = (self.relalookpos[0] ** 2 + self.relalookpos[2] ** 2) ** 0.5
+                self.relalookpos[0] -= self.relalookpos[2] / dl * camstepsize
+                self.relalookpos[2] -= -self.relalookpos[0] / dl * camstepsize
+            def cr():
+                dl = (self.relalookpos[0] ** 2 + self.relalookpos[2] ** 2) ** 0.5
+                self.relalookpos[0] += self.relalookpos[2] / dl * camstepsize
+                self.relalookpos[2] += -self.relalookpos[0] / dl * camstepsize
+            def zp2():
+                self.relalookpos[2] += camstepsize
+            def zn2():
+                self.relalookpos[2] -= camstepsize
+            def zin():
+                self.k*=1.1
+            def zout():
+                self.k*=0.9
+
+            turtle.onkeypress(fw, key="w")
+            turtle.onkeypress(bw, key="s")
+            turtle.onkeypress(le, key="a")
+            turtle.onkeypress(ri, key="d")
+            turtle.onkeypress(zp, key="space")
+            turtle.onkeypress(zn, key="Control_L")
+            turtle.onkeypress(cu, key="Up")
+            turtle.onkeypress(cd, key="Down")
+            turtle.onkeypress(cl, key="Left")
+            turtle.onkeypress(cr, key="Right")
+            turtle.onkeypress(zp2, key="u")
+            turtle.onkeypress(zn2, key="o")
+            turtle.onkeypress(zin, key="]")
+            turtle.onkeypress(zout, key="[")
+            turtle.listen()
+
     class tgraph:
         '''
         使用turtle实现的图表显示，使用前先创建对象
