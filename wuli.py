@@ -436,7 +436,7 @@ class Phy:
                     continue
                 d=toushi(d)
                 turtle.goto(d[0], d[1])
-                turtle.dot(i.r * 2, i.color)
+                turtle.dot(i.r*2, i.color)
                 if a == True:
                     da=Phy.xianxing([i.p[0]-c.p[0] + (i.axianshi[0]* 1-c.axianshi[0])*azoom,
                                      i.p[1]-c.p[1] + (i.axianshi[1]* 1-c.axianshi[1])*azoom,
@@ -490,6 +490,17 @@ class Phy:
                               (lookpos[1]-campos[1])/l,
                               (lookpos[2]-campos[2])/l]
             self.k=k
+
+        def setlookpos(self,lookpos):
+            '''
+            设置相机视角
+            :param lookpos: list[x,y,z] 注视点坐标
+            :return: None
+            '''
+            l = ((lookpos[0] - self.cam.p[0]) ** 2 + (lookpos[1] - self.cam.p[1]) ** 2 + (lookpos[2] - self.cam.p[2]) ** 2) ** 0.5
+            self.relalookpos = [(lookpos[0] - self.cam.p[0]) / l,
+                                (lookpos[1] - self.cam.p[1]) / l,
+                                (lookpos[2] - self.cam.p[2]) / l]
 
         @classmethod
         def tready(self):
