@@ -502,6 +502,27 @@ class Phy:
                                 (lookpos[1] - self.cam.p[1]) / l,
                                 (lookpos[2] - self.cam.p[2]) / l]
 
+        def dotposspace(self,pos):
+            x = Phy.shijiaoshi(self.cam.p, [self.relalookpos[0] + self.cam.p[0],
+                                            self.relalookpos[1] + self.cam.p[1],
+                                            self.relalookpos[2] + self.cam.p[2]])
+            d = Phy.dotpos(pos, self.cam.p, x)
+            return d
+
+        def cdotpos(self,pos):
+            '''
+            返回一个点被相机拍到后在屏幕上的位置
+            :param pos: list[x,y,z] 点的坐标
+            :return: list[x,y] or None 在屏幕上的坐标，当无法进行透视变换时返回None
+            '''
+            x = Phy.shijiaoshi(self.cam.p, [self.relalookpos[0] + self.cam.p[0],
+                                            self.relalookpos[1] + self.cam.p[1],
+                                            self.relalookpos[2] + self.cam.p[2]])
+            d=Phy.dotpos(pos,self.cam.p,x)
+            if d[2]>0:
+                return Phy.perspective(d,[0,0,0],self.k)
+            return None
+
         @classmethod
         def tready(self):
             '''
