@@ -58,11 +58,11 @@ def zn2():
 
 
 d=[0,0,10]
-d0=Phy(1, [0, 0, 0], [0, 0, -300])
+d0=DingPhy(1, [0, 0, 0], [0, 0, -300])
 cbuchang=0.5
 buchang=5
 
-dp=Phy(1,[0,0,0],[d[0] + d0.p[0], d[1] + d0.p[1], d[2] + d0.p[2]],r=5,color="red")
+dp=Phy(1,[0,0,0],[d[0] + d0.p[0], d[1] + d0.p[1], d[2] + d0.p[2]],r=0.1,color="red")
 
 Phy.tready()
 a=[50,50,50]

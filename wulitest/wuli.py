@@ -29,7 +29,7 @@ class Phy:
 
     biao = []  # 这个表里记录了所有被创建的点，计算时会遍历它
 
-    def __str__(self):
+    def __repr__(self):
         return f"m={self.m},v={self.v},p={self.p},a={self.axianshi}"
 
     def force(self, li):
@@ -434,9 +434,9 @@ class Phy:
                 d=Phy.dotpos(i.p,c.p,x)
                 if k is not None and d[2]<=0:
                     continue
-                d=toushi(d)
-                turtle.goto(d[0], d[1])
-                turtle.dot(i.r*2, i.color)
+                d2=toushi(d)
+                turtle.goto(d2[0], d2[1])
+                turtle.dot(i.r*2/d[2]*k if k is not None else i.r*2, i.color)
                 if a == True:
                     da=Phy.xianxing([i.p[0]-c.p[0] + (i.axianshi[0]* 1-c.axianshi[0])*azoom,
                                      i.p[1]-c.p[1] + (i.axianshi[1]* 1-c.axianshi[1])*azoom,
@@ -445,9 +445,9 @@ class Phy:
                         continue
                     da=toushi(da)
                     turtle.pencolor("red")
-                    turtle.goto(d[0], d[1])
+                    turtle.goto(d2[0], d2[1])
                     turtle.pendown()
-                    turtle.goto(da[0] , da[1] )
+                    turtle.goto(da[0], da[1])
                     turtle.penup()
                     turtle.pencolor("black")
                 if v == True:
@@ -458,9 +458,9 @@ class Phy:
                         continue
                     dv=toushi(dv)
                     turtle.pencolor("blue")
-                    turtle.goto(d[0], d[1])
+                    turtle.goto(d2[0], d2[1])
                     turtle.pendown()
-                    turtle.goto(dv[0] , dv[1] )
+                    turtle.goto(dv[0], dv[1])
                     turtle.penup()
                     turtle.pencolor("black")
 

@@ -6,7 +6,7 @@ yrange=(-500,500)
 zrange=(-300,5000)
 vrange=(0,0)
 mrange=(10,50)
-rrange=(2,5)
+rrange=(5,20)
 star_num=20
 for i in range(star_num):
     m = random.uniform(mrange[0], mrange[1])
@@ -29,7 +29,7 @@ turtle.bgcolor("black")
 while True:
     Phy.gravity(10)
     Phy.run(0.1)
-    c.tplay(v=True)
+    c.tplay()
     c.movecam(stepsize=5)
 
 
