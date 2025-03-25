@@ -60,7 +60,7 @@ class Phy:
         :param x: float 弹簧原长 None 默认当前长度为原长
         :param k: float 劲度系数
         :param other: Phy 弹簧的另一个点
-        :param string: bool 弹力模型为线型（True）或杆型（False）
+        :param string: bool 弹力模型为绳型（True）或杆型（False）
         :return: None 直接修改a，无返回
         '''
         if x is None and (not ((self, other) in Phy.rbook.keys())):
@@ -713,7 +713,7 @@ class DingPhy(Phy): #定点，不参与力的计算
         if r is None:
             r = m ** 0.3
         self.r = r
-        self.axianshi = self.a
+        self.axianshi = [0,0,0]
         self.color = color
 
 class Changjing:
